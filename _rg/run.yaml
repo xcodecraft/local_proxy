@@ -10,6 +10,8 @@ _env:
                 CONF_PATH : "/${HOME}/etc/local_proxy"
                 LOCAL_PROXY_HOME : "${PRJ_ROOT}"
                 DOMAIN          : "${USER}.monitor.local-proxy.com"
+                ADMIN_PORT      : "2020"
+                CORE_ADMIN_PORT : "2021"
     - !R.env
         _name : "_safe_deploy"
         _res  :
@@ -22,6 +24,8 @@ _env:
                 LOCAL_PROXY_HOME : "${PRJ_ROOT}"
                 DOMAIN:       "monitor.local-proxy.com"
 
+                ADMIN_PORT      : "2030"
+                CORE_ADMIN_PORT : "2031"
 
 
 
@@ -34,8 +38,6 @@ _env:
                 CORE_PORT       : "8094"
                 MEMSIZE         : "10M"
                 CORE_MEMSIZE    : "10M"
-                ADMIN_PORT      : "2020"
-                CORE_ADMIN_PORT : "2021"
 
 
     - !R.env
