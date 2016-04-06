@@ -1,0 +1,164 @@
+_env:
+    - !R.env
+        _name : "_local_deploy"
+        _res  :
+            - !R.project
+                root        : "${HOME}/devspace/local_proxy"
+                name        : "local_proxy"
+            - !R.vars
+                RUN_USER  : "${USER}"
+                CONF_PATH : "/${HOME}/etc/local_proxy"
+                LOCAL_PROXY_HOME : "${PRJ_ROOT}"
+                DOMAIN          : "${USER}.monitor.local-proxy.com"
+    - !R.env
+        _name : "_safe_deploy"
+        _res  :
+            - !R.project
+                root      : "/data/x/projects/local_proxy"
+                name      : "local_proxy"
+            - !R.vars
+                RUN_USER  : "ayb"
+                CONF_PATH : "/etc/local_proxy"
+                LOCAL_PROXY_HOME : "${PRJ_ROOT}"
+                DOMAIN:       "monitor.local-proxy.com"
+
+
+
+
+    - !R.env
+
+        _name    : "_dev"
+        _res :
+            - !R.vars
+                PORT            : "8093"
+                CORE_PORT       : "8094"
+                MEMSIZE         : "10M"
+                CORE_MEMSIZE    : "10M"
+                ADMIN_PORT      : "2020"
+                CORE_ADMIN_PORT : "2021"
+
+
+    - !R.env
+        _name    : "_online"
+        _res :
+
+            - !R.vars
+                PORT:         "8081"
+                MEMSIZE:      "400M"
+                CORE_PORT:    "8082"
+                CORE_MEMSIZE: "200M"
+
+
+    - !R.env
+        _name    : "base"
+        _res :
+            - !R.path
+                dst  : "${PRJ_ROOT}/conf/used/,${PRJ_ROOT}/tmp"
+            - !R.path
+                sudo : True
+                keep : True 
+                dst  : "${CONF_PATH},${CONF_PATH}/app,${CONF_PATH}/core"
+            - !R.nginx_conf 
+                sudo : True
+                bin  : "/sbin/service nginx"
+                dst  : "/usr/local/nginx/conf/include/"
+                tpl  : "${PRJ_ROOT}/conf/options/tpl_ngx.conf"
+                name : "${PRJ_NAME}_${USER}.conf"
+
+
+
+
+
+    - !R.env
+        _name    : "dev"
+        _mix     : "_local_deploy,base,_dev"
+    - !R.env
+        _name    : "online"
+        _mix     : "_safe_deploy,base,_online"
+
+_sys:
+
+
+    - !R.system
+        _name: "app_cache"
+        _res:
+            - !R.using
+                path  : "${LOCAL_PROXY_HOME}/lib/extend.yaml"
+                modul : "local_proxy"
+                args  : !R.vars
+                    L_HOST  : "${DOMAIN}"
+                    L_BEND  : "127.0.0.1"
+                    L_CHECK : "/rand"
+                    L_PORT  : "80"
+                    L_DST   : "${CONF_PATH}/app"
+
+            - !R.file_merge
+                src        : "${PRJ_ROOT}/conf/common/:${CONF_PATH}/app"
+                dst        : "${PRJ_ROOT}/conf/used/local_cache_app.vcl"
+                filter     : '.+\.vcl$'
+
+            - !R.varnishd
+                sudo       : True
+                svc_port   : "${PORT}"
+                svc_ip     : "127.0.0.1"
+                admin_port : "${ADMIN_PORT}"
+                admin_ip   : "127.0.0.1"
+                mem        : "${MEMSIZE}"
+                vcl        : "${PRJ_ROOT}/conf/used/local_cache_app.vcl"
+                name       : "local_proxy_app"
+                varnishd   : "/usr/local/varnish-4.1.2/sbin/varnishd"
+                varnishadm : "/usr/local/varnish-4.1.2/bin/varnishadm"
+
+            #以下进行测试
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl 127.0.0.1:8086/rand -H \"host: ${DOMAIN}\" "
+
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl ${DOMAIN}:8086/rand  -x 127.0.0.1:${PORT} "
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl ${DOMAIN}:8086/rand  -x 127.0.0.1:${PORT} "
+
+    - !R.system
+        _name: "core_cache"
+        _res:
+            - !R.using
+                path  : "${LOCAL_PROXY_HOME}/lib/extend.yaml"
+                modul : "local_proxy"
+                args  : !R.vars
+                    L_HOST  : "${DOMAIN}"
+                    L_BEND  : "127.0.0.1"
+                    L_CHECK : "/rand"
+                    L_PORT  : "80"
+                    L_DST   : "${CONF_PATH}/core"
+
+            - !R.file_merge
+                src        : "${PRJ_ROOT}/conf/common/:${CONF_PATH}/core"
+                dst        : "${PRJ_ROOT}/conf/used/local_cache_core.vcl"
+                filter     : '.+\.vcl$'
+
+            - !R.varnishd
+                sudo       : True
+                svc_port   : "${CORE_PORT}"
+                svc_ip     : "127.0.0.1"
+                admin_port : "${CORE_ADMIN_PORT}"
+                admin_ip   : "127.0.0.1"
+                mem        : "${CORE_MEMSIZE}"
+                vcl        : "${PRJ_ROOT}/conf/used/local_cache_core.vcl"
+                name       : "local_proxy_core"
+                varnishd   : "/usr/local/varnish-4.1.2/sbin/varnishd"
+                varnishadm : "/usr/local/varnish-4.1.2/bin/varnishadm"
+
+            #以下进行测试
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl 127.0.0.1:8086/rand -H \"host: ${DOMAIN}\" "
+
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl ${DOMAIN}:8086/rand  -x 127.0.0.1:${CORE_PORT} "
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl ${DOMAIN}:8086/rand  -x 127.0.0.1:${CORE_PORT} "

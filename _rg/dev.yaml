@@ -1,0 +1,9 @@
+_dev:
+    - !C.project
+        name : "local_proxy"
+        root : "${HOME}/devspace/local_proxy"
+    - !C.version
+        file : "version.txt"
+    - !C.git
+        remote : "git@github.com:xcodecraft/local_proxy.git"
+

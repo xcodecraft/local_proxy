@@ -1,0 +1,1 @@
+*/5 * * * * (cd ${PRJ_ROOT}; sh bin/watcher.sh > /dev/null 2>&1 )

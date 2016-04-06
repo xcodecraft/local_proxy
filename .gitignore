@@ -1,0 +1,16 @@
+pui
+*_autoload*
+_act*
+*.swp
+*.tmp
+._pylon.dat
+.gd*
+conf/used
+tmp
+cscop*
+runtime/*
+_rg/.*
+test/conf/used/*
+*.log
+run
+.prjide
