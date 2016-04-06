@@ -1,6 +1,6 @@
 backend ${PRJ_NAME}_backend {
     .host = "${L_BEND}";
-    .port = "8086" ;
+    .port = "${L_PORT}" ;
     .host_header = "${L_HOST}" ;
     .probe = {
         .url = "${L_CHECK}";
