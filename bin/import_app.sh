@@ -14,4 +14,4 @@ DST_VCL=$LPATH/$VCL
 
 cp -f $SRC_VCL $DST_VCL
 cd /data/x/projects/local_proxy ;
-/data/x/tools/rigger-ng  reconf,reload
+/data/x/tools/rigger-ng/rg  reconf,reload
