@@ -2,6 +2,11 @@
 
 Local_proxy  是一个基于 varnishd 的 本地缓存服务
 
+## 依赖
+
+- rigger-ng
+- varnish-4.0 以上
+
 ##  生成vcl 文件
 ``` yaml
             - !R.using
