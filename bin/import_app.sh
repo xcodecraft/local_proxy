@@ -4,7 +4,7 @@ if test $# -ne 1 ; then
 
 fi 
 SRC_VCL=$1
-LPATH=/etc/local_proxy/core
+LPATH=/etc/local_proxy/app
 
 VCL=`basename $SRC_VCL`
 VCL_PATH=`dirname $SRC_VCL`
