@@ -17,7 +17,7 @@ _env:
         _name : "_safe_deploy"
         _res  :
             - !R.project
-                root             : "/data/x/projects/local_proxy"
+                root             : "/data/x/svcs/local_proxy"
                 name             : "local_proxy"
             - !R.vars
                 RUN_USER         : "ayb"
