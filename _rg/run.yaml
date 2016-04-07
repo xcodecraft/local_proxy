@@ -3,29 +3,31 @@ _env:
         _name : "_local_deploy"
         _res  :
             - !R.project
-                root        : "${HOME}/devspace/local_proxy"
-                name        : "local_proxy"
+                root             : "${HOME}/devspace/local_proxy"
+                name             : "local_proxy"
             - !R.vars
-                RUN_USER  : "${USER}"
-                CONF_PATH : "/${HOME}/etc/local_proxy"
+                RUN_USER         : "${USER}"
+                CONF_PATH        : "/${HOME}/etc/local_proxy"
                 LOCAL_PROXY_HOME : "${PRJ_ROOT}"
-                DOMAIN          : "${USER}.monitor.local-proxy.com"
-                ADMIN_PORT      : "2020"
-                CORE_ADMIN_PORT : "2021"
+                DOMAIN           : "${USER}.monitor.local-proxy.com"
+                ADMIN_PORT       : "2020"
+                CORE_ADMIN_PORT  : "2021"
+                VARNISH_TAG      : "_dev"
     - !R.env
         _name : "_safe_deploy"
         _res  :
             - !R.project
-                root      : "/data/x/projects/local_proxy"
-                name      : "local_proxy"
+                root             : "/data/x/projects/local_proxy"
+                name             : "local_proxy"
             - !R.vars
-                RUN_USER  : "ayb"
-                CONF_PATH : "/etc/local_proxy"
+                RUN_USER         : "ayb"
+                CONF_PATH        : "/etc/local_proxy"
                 LOCAL_PROXY_HOME : "${PRJ_ROOT}"
-                DOMAIN:       "monitor.local-proxy.com"
+                DOMAIN           : "monitor.local-proxy.com"
 
-                ADMIN_PORT      : "2030"
-                CORE_ADMIN_PORT : "2031"
+                ADMIN_PORT       : "2030"
+                CORE_ADMIN_PORT  : "2031"
+                VARNISH_TAG      : ""
 
 
 
@@ -58,7 +60,7 @@ _env:
                 dst  : "${PRJ_ROOT}/conf/used/,${PRJ_ROOT}/tmp"
             - !R.path
                 sudo : True
-                keep : True 
+                keep : True
                 dst  : "${CONF_PATH},${CONF_PATH}/app,${CONF_PATH}/core"
             - !R.nginx_conf 
                 sudo : True
@@ -86,8 +88,9 @@ _sys:
         _res:
             - !R.using
                 path  : "${LOCAL_PROXY_HOME}/lib/extend.yaml"
-                modul : "local_proxy"
+                modul : "single_end"
                 args  : !R.vars
+                    L_TAG   : "local_proxy"
                     L_HOST  : "${DOMAIN}"
                     L_BEND  : "127.0.0.1"
                     L_CHECK : "/rand"
@@ -107,7 +110,7 @@ _sys:
                 admin_ip   : "127.0.0.1"
                 mem        : "${MEMSIZE}"
                 vcl        : "${PRJ_ROOT}/conf/used/local_cache_app.vcl"
-                name       : "local_proxy_app"
+                name       : "lproxy_app${VARNISH_TAG}"
                 varnishd   : "/usr/local/varnish-4.1.2/sbin/varnishd"
                 varnishadm : "/usr/local/varnish-4.1.2/bin/varnishadm"
 
@@ -128,8 +131,9 @@ _sys:
         _res:
             - !R.using
                 path  : "${LOCAL_PROXY_HOME}/lib/extend.yaml"
-                modul : "local_proxy"
+                modul : "single_end"
                 args  : !R.vars
+                    L_TAG   : "local_proxy"
                     L_HOST  : "${DOMAIN}"
                     L_BEND  : "127.0.0.1"
                     L_CHECK : "/rand"
@@ -149,7 +153,7 @@ _sys:
                 admin_ip   : "127.0.0.1"
                 mem        : "${CORE_MEMSIZE}"
                 vcl        : "${PRJ_ROOT}/conf/used/local_cache_core.vcl"
-                name       : "local_proxy_core"
+                name       : "lproxy_core${VARNISH_TAG}"
                 varnishd   : "/usr/local/varnish-4.1.2/sbin/varnishd"
                 varnishadm : "/usr/local/varnish-4.1.2/bin/varnishadm"
 
@@ -164,3 +168,33 @@ _sys:
             - !R.cmd
                 run : "start,reload"
                 cmd: "curl ${DOMAIN}:8086/rand  -x 127.0.0.1:${CORE_PORT} "
+
+
+    - !R.system
+        _name: "test"
+        _res:
+            - !R.vars 
+                SYS_DOMAIN : "double_end.${DOMAIN}"
+
+            - !R.using
+                path  : "${LOCAL_PROXY_HOME}/lib/extend.yaml"
+                modul : "double_end"
+                args  : !R.vars
+                    L_BEND_1  : "127.0.0.1"
+                    L_BEND_2  : "127.0.0.1"
+                    L_TAG   : "double_end_tc"
+                    L_HOST  : "${SYS_DOMAIN}"
+                    L_CHECK : "/rand"
+                    L_PORT  : "8086"
+                    L_DST   : "${CONF_PATH}/app"
+
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl 127.0.0.1:8086/rand -H \"host: ${SYS_DOMAIN}\" "
+
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl ${SYS_DOMAIN}:8086/rand  -x 127.0.0.1:${CORE_PORT} "
+            - !R.cmd
+                run : "start,reload"
+                cmd: "curl ${SYS_DOMAIN}:8086/rand  -x 127.0.0.1:${CORE_PORT} "

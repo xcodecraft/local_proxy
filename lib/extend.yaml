@@ -1,8 +1,15 @@
 _mod :
     - !R.modul
-        _name : "local_proxy"
-        _args : "${L_BEND_SVC},${L_HOST},${L_CHECK_URL},${L_PORT}"
+        _name : "single_end"
+        _args : "${L_BEND_SVC},${L_HOST},${L_CHECK_URL},${L_PORT},${L_TAG}"
         _res  :
             - !R.file_tpl
-                tpl : "${LOCAL_PROXY_HOME}/lib/std.vcl"
-                dst : "${L_DST}/${PRJ_NAME}.vcl"
+                tpl : "${LOCAL_PROXY_HOME}/lib/single_end.vcl"
+                dst : "${L_DST}/${L_TAG}.vcl"
+    - !R.modul
+        _name : "double_end"
+        _args : "${L_BEND_SVC},${L_HOST},${L_CHECK_URL},${L_PORT},${L_TAG}"
+        _res  :
+            - !R.file_tpl
+                tpl : "${LOCAL_PROXY_HOME}/lib/double_end.vcl"
+                dst : "${L_DST}/${L_TAG}.vcl"

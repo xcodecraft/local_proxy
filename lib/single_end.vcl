@@ -1,4 +1,4 @@
-backend ${PRJ_NAME}_backend {
+backend ${L_TAG}_backend {
     .host = "${L_BEND}";
     .port = "${L_PORT}" ;
     .host_header = "${L_HOST}" ;
@@ -15,7 +15,7 @@ sub vcl_recv {
 
     if (req.http.host ~ "${L_HOST}") {
         std.log("set ${L_HOST} backend ") ;
-        set req.backend_hint = ${PRJ_NAME}_backend ;
+        set req.backend_hint = ${L_TAG}_backend ;
     }
 }
 
