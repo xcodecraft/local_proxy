@@ -15,5 +15,5 @@ DST_VCL=$LPATH/$VCL
 #机房适配
 
 cp -f $SRC_VCL $DST_VCL
-cd /data/x/projects/local_proxy ;
+cd /data/x/svcs/local_proxy ;
 /data/x/tools/rigger-ng/rg  reconf,reload -q
