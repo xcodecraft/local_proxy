@@ -111,8 +111,6 @@ _sys:
                 mem        : "${MEMSIZE}"
                 vcl        : "${PRJ_ROOT}/conf/used/local_cache_app.vcl"
                 name       : "lproxy_app${VARNISH_TAG}"
-                varnishd   : "/usr/local/varnish-4.1.2/sbin/varnishd"
-                varnishadm : "/usr/local/varnish-4.1.2/bin/varnishadm"
 
             #以下进行测试
             - !R.cmd
@@ -154,8 +152,6 @@ _sys:
                 mem        : "${CORE_MEMSIZE}"
                 vcl        : "${PRJ_ROOT}/conf/used/local_cache_core.vcl"
                 name       : "lproxy_core${VARNISH_TAG}"
-                varnishd   : "/usr/local/varnish-4.1.2/sbin/varnishd"
-                varnishadm : "/usr/local/varnish-4.1.2/bin/varnishadm"
 
             #以下进行测试
             - !R.cmd
